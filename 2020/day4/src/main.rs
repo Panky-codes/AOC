@@ -43,6 +43,7 @@ eyr:2038 hcl:74454a iyr:2023
 pid:3556412378 byr:2007";
 
 fn main() {
+    // Data structures
     let id_map: HashMap<&str, i32> = [
         ("byr", 1),
         ("iyr", 1),
@@ -70,7 +71,8 @@ fn main() {
 
     let contents =
         fs::read_to_string("src/input.txt").expect("Something went wrong reading the file");
-
+    
+    // Algorithm
     let puzzle_one = |s: &str| {
         let mut sum = 0;
         for id in s.split_whitespace() {
@@ -108,11 +110,13 @@ fn main() {
         .filter(|x| *x != "")
         .map(puzzle_one)
         .sum();
+    
     let puzzle_two_sum: usize = contents
         .split("\n\n")
         .filter(|x| *x != "")
         .map(puzzle_two)
         .sum();
+    
     println!("{}", puzzle_one_sum);
     println!("{}", puzzle_two_sum);
 }
