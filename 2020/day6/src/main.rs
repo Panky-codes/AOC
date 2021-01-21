@@ -55,7 +55,7 @@ fn main() {
     let contents = fs::read_to_string("src/input.txt").expect("Something went wrong reading the file");
     
     let ans_sum : usize = contents.split("\n\n").map(find_sum).sum();
-    let everyone_ans_sum: usize = _RAW_INP1.split("\n\n").map(find_unique_sum).sum();
+    let everyone_ans_sum: usize = contents.split("\n\n").map(find_unique_sum).sum();
     
     println!("The answer for puzzle one is: {}", ans_sum);
     println!("The answer for puzzle two is: {}", everyone_ans_sum);
