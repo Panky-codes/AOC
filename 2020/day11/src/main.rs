@@ -17,7 +17,161 @@ enum Seat {
     Occupied,
 }
 
-fn get_neighbours(idx: isize, row: isize, col: isize) -> Vec<isize> {
+fn get_neighbours_see_2(inp: &Vec<Seat>, idx: isize, row: isize, col: isize) -> Vec<Seat> {
+    let mut diag_list: Vec<Seat> = vec![];
+    let has_left: bool = if idx % col > 0 { true } else { false };
+    let has_right: bool = if idx % col < (col - 1) { true } else { false };
+    let has_upper: bool = if idx >= col { true } else { false };
+    let has_bottom: bool = if idx < ((row * col) - col) {
+        true
+    } else {
+        false
+    };
+
+    let calc_y = |index: isize| -> isize { (index - (index % col)) / col };
+
+    // Left most column
+    if has_left {
+        let mut cur_idx = idx;
+        loop {
+            cur_idx -= 1;
+            // check if they are in the same row
+            if calc_y(cur_idx) == calc_y(idx) && cur_idx >= 0 {
+                if inp[cur_idx as usize] != Seat::Floor {
+                    diag_list.push(inp[cur_idx as usize]);
+                    break;
+                }
+            } else {
+                diag_list.push(Seat::Floor);
+                break;
+            }
+        }
+    }
+    if has_right {
+        let mut cur_idx = idx;
+        loop {
+            cur_idx += 1;
+            // check if they are in the same row
+            if calc_y(cur_idx) == calc_y(idx) && cur_idx < (row * col) {
+                if inp[cur_idx as usize] != Seat::Floor {
+                    diag_list.push(inp[cur_idx as usize]);
+                    break;
+                }
+            } else {
+                diag_list.push(Seat::Floor);
+                break;
+            }
+        }
+    }
+    if has_upper {
+        let mut cur_idx = idx;
+        loop {
+            cur_idx -= col;
+            if cur_idx >= 0 {
+                if inp[cur_idx as usize] != Seat::Floor {
+                    diag_list.push(inp[cur_idx as usize]);
+                    break;
+                }
+            } else {
+                diag_list.push(Seat::Floor);
+                break;
+            }
+        }
+        if has_left {
+            let mut cur_idx = idx;
+            let mut i = 1;
+            loop {
+                cur_idx = cur_idx - (i * col) - i;
+                // Check if it wrapped to the other side
+                if cur_idx >= 0 && calc_y(idx - (i * col)) == calc_y(cur_idx) {
+                    if inp[cur_idx as usize] != Seat::Floor {
+                        diag_list.push(inp[cur_idx as usize]);
+                        break;
+                    }
+                } else {
+                    diag_list.push(Seat::Floor);
+                    break;
+                }
+                i += 1;
+            }
+        }
+        if has_right {
+            let mut cur_idx = idx;
+            let mut i = 1;
+            loop {
+                cur_idx = cur_idx - (i * col) + i;
+                // Check if it wrapped to the other side
+                if cur_idx >= 0 && calc_y(idx - (i * col)) == calc_y(cur_idx) {
+                    if inp[cur_idx as usize] != Seat::Floor {
+                        diag_list.push(inp[cur_idx as usize]);
+                        break;
+                    }
+                } else {
+                    diag_list.push(Seat::Floor);
+                    break;
+                }
+                i += 1;
+            }
+        }
+    }
+
+    if has_bottom {
+        let mut cur_idx = idx;
+        loop {
+            cur_idx += col;
+            // check if they are in the same row
+            if cur_idx < (row * col) {
+                if inp[cur_idx as usize] != Seat::Floor {
+                    diag_list.push(inp[cur_idx as usize]);
+                    break;
+                }
+            } else {
+                diag_list.push(Seat::Floor);
+                break;
+            }
+        }
+        if has_left {
+            let mut cur_idx = idx;
+            let mut i = 1;
+            loop {
+                cur_idx = cur_idx + (i * col) - i;
+                // Check if it wrapped to the other side
+                if cur_idx < (row * col) && calc_y(idx + (i * col)) == calc_y(cur_idx) {
+                    if inp[cur_idx as usize] != Seat::Floor {
+                        diag_list.push(inp[cur_idx as usize]);
+                        break;
+                    }
+                } else {
+                    diag_list.push(Seat::Floor);
+                    break;
+                }
+                i += 1;
+            }
+        }
+        if has_right {
+            let mut cur_idx = idx;
+            let mut i = 1;
+            loop {
+                cur_idx = cur_idx + (i * col) + i;
+                // Check if it wrapped to the other side
+                if cur_idx < (row * col) && calc_y(idx + (i * col)) == calc_y(cur_idx) {
+                    if inp[cur_idx as usize] != Seat::Floor {
+                        diag_list.push(inp[cur_idx as usize]);
+                        break;
+                    }
+                } else {
+                    diag_list.push(Seat::Floor);
+                    break;
+                }
+                i += 1;
+            }
+        }
+    }
+
+    diag_list.into_iter().collect()
+}
+
+fn get_neighbours_1(idx: isize, row: isize, col: isize) -> Vec<isize> {
     let mut idx_vec: Vec<isize> = vec![];
     let has_left: bool = if idx % col > 0 { true } else { false };
     let has_right: bool = if idx % col < (col - 1) { true } else { false };
@@ -61,27 +215,44 @@ fn get_neighbours(idx: isize, row: isize, col: isize) -> Vec<isize> {
         .collect()
 }
 
-fn check_empty_condition(inp: &Vec<Seat>, idx: isize, row: isize, col: isize) -> bool {
-    let idx_vec = get_neighbours(idx, row, col);
+fn check_empty_condition(inp: &Vec<Seat>, idx: isize, row: isize, col: isize, puzno: i32) -> bool {
+    if puzno == 1 {
+        let idx_vec = get_neighbours_1(idx, row, col);
+        let res = idx_vec.iter().find(|x| inp[**x as usize] == Seat::Occupied);
 
-    let res = idx_vec.iter().find(|x| inp[**x as usize] == Seat::Occupied);
-
-    if let Some(_) = res {
-        return false;
+        if let Some(_) = res {
+            return false;
+        }
+        return true;
+    } else {
+        let neig_vec = get_neighbours_see_2(inp, idx, row, col);
+        let res = neig_vec.iter().find(|x| **x == Seat::Occupied);
+        if let Some(_) = res {
+            return false;
+        }
+        true
     }
-    true
 }
 
-fn check_occu_condition(inp: &Vec<Seat>, idx: isize, row: isize, col: isize) -> bool {
-    let idx_vec = get_neighbours(idx, row, col);
-    let res = idx_vec
-        .iter()
-        .filter(|x| inp[**x as usize] == Seat::Occupied)
-        .count();
-    if res >= 4 {
-        return true;
+fn check_occu_condition(inp: &Vec<Seat>, idx: isize, row: isize, col: isize, puzno: i32) -> bool {
+    if puzno == 1 {
+        let idx_vec = get_neighbours_1(idx, row, col);
+        let res = idx_vec
+            .iter()
+            .filter(|x| inp[**x as usize] == Seat::Occupied)
+            .count();
+        if res >= 4 {
+            return true;
+        }
+        false
+    } else {
+        let neig_vec = get_neighbours_see_2(inp, idx, row, col);
+        let res = neig_vec.iter().filter(|x| **x == Seat::Occupied).count();
+        if res >= 5 {
+            return true;
+        }
+        false
     }
-    false
 }
 
 fn debug_print_layout(inp: &Vec<Seat>, row: usize, col: usize) {
@@ -99,7 +270,7 @@ fn debug_print_layout(inp: &Vec<Seat>, row: usize, col: usize) {
     println!("\n")
 }
 
-fn puzzle_one(inp: &mut Vec<Seat>, row: usize, col: usize) -> usize {
+fn puzzle(inp: &mut Vec<Seat>, row: usize, col: usize, puzno: i32) -> usize {
     let mut is_changed = true;
 
     while is_changed {
@@ -116,6 +287,7 @@ fn puzzle_one(inp: &mut Vec<Seat>, row: usize, col: usize) -> usize {
                         idx.try_into().unwrap(),
                         row.try_into().unwrap(),
                         col.try_into().unwrap(),
+                        2,
                     ) {
                         is_changed = true;
                         cloned_inp[idx] = Seat::Occupied;
@@ -128,6 +300,7 @@ fn puzzle_one(inp: &mut Vec<Seat>, row: usize, col: usize) -> usize {
                         idx.try_into().unwrap(),
                         row.try_into().unwrap(),
                         col.try_into().unwrap(),
+                        2,
                     ) {
                         is_changed = true;
                         cloned_inp[idx] = Seat::Empty;
@@ -136,7 +309,7 @@ fn puzzle_one(inp: &mut Vec<Seat>, row: usize, col: usize) -> usize {
             }
         }
         *inp = cloned_inp;
-        // debug_print_layout(&inp, row, col);
+        debug_print_layout(&inp, row, col);
     }
     inp.iter().filter(|x| **x == Seat::Occupied).count()
 }
@@ -145,7 +318,7 @@ fn main() {
     let _contents =
         fs::read_to_string("src/input.txt").expect("Something went wrong reading the file");
 
-    let input = _contents;
+    let input = _RAW_INP1;
 
     let mut inp_vec: Vec<Seat> = input
         .chars()
@@ -159,8 +332,11 @@ fn main() {
         .collect();
     let row_len = input.split('\n').count();
     let col_len = inp_vec.len() / row_len;
-    let count = puzzle_one(&mut inp_vec, row_len, col_len);
-    println!("{:?}", count);
+    // let count = puzzle(&mut inp_vec, row_len, col_len, 1);
+    // println!("{:?}", count);
+
+    let count2 = puzzle(&mut inp_vec, row_len, col_len, 2);
+    println!("{:?}", count2);
 }
 
 #[cfg(test)]
@@ -169,37 +345,37 @@ mod tests {
 
     #[test]
     fn verify_neighbors() {
-        let ret_vec = get_neighbours(0, 3, 3);
+        let ret_vec = get_neighbours_1(0, 3, 3);
         assert_eq!(vec![1, 3, 4], ret_vec);
 
-        let ret_vec = get_neighbours(1, 3, 3);
+        let ret_vec = get_neighbours_1(1, 3, 3);
         assert_eq!(vec![0, 2, 4, 3, 5], ret_vec);
 
-        let ret_vec = get_neighbours(2, 3, 3);
+        let ret_vec = get_neighbours_1(2, 3, 3);
         assert_eq!(vec![1, 5, 4], ret_vec);
 
-        let ret_vec = get_neighbours(4, 3, 3);
+        let ret_vec = get_neighbours_1(4, 3, 3);
         assert_eq!(vec![3, 5, 1, 0, 2, 7, 6, 8], ret_vec);
 
-        let ret_vec = get_neighbours(8, 3, 3);
+        let ret_vec = get_neighbours_1(8, 3, 3);
         assert_eq!(vec![7, 5, 4], ret_vec);
     }
 
     #[test]
     fn verify_neighbors_even_odd() {
-        let ret_vec = get_neighbours(0, 3, 4);
+        let ret_vec = get_neighbours_1(0, 3, 4);
         assert_eq!(vec![1, 4, 5], ret_vec);
 
-        let ret_vec = get_neighbours(1, 3, 3);
+        let ret_vec = get_neighbours_1(1, 3, 3);
         assert_eq!(vec![0, 2, 4, 3, 5], ret_vec);
 
-        let ret_vec = get_neighbours(2, 3, 3);
+        let ret_vec = get_neighbours_1(2, 3, 3);
         assert_eq!(vec![1, 5, 4], ret_vec);
 
-        let ret_vec = get_neighbours(4, 3, 3);
+        let ret_vec = get_neighbours_1(4, 3, 3);
         assert_eq!(vec![3, 5, 1, 0, 2, 7, 6, 8], ret_vec);
 
-        let ret_vec = get_neighbours(8, 3, 3);
+        let ret_vec = get_neighbours_1(8, 3, 3);
         assert_eq!(vec![7, 5, 4], ret_vec);
     }
 }
