@@ -44,9 +44,6 @@ const _RAW_INP2: &str = r"16
 4";
 
 fn puzzle_one(inp_vec: &Vec<u32>) {
-    // let one_offset = if inp_vec[1] == 1 { 1 } else { 0 };
-    // let three_offset = if inp_vec[1] == 3 { 1 } else { 0 };
-
     let (count_one, count_three) = inp_vec.windows(2).fold(
         (0, 0), // Plus one for the last charger
         |(count_one, count_three), x| match x[1] - x[0] {
@@ -84,24 +81,18 @@ fn puzzle_two(inp_vec: &Vec<u32>) -> u64 {
     // A big Vector (like a hashmap) with index used as the charger joltage and value corresponds
     // to the nr. of possible ways to reach it
     // TODO: Change it to hashmap to save space
-    let mut conn_count: Vec<u64> = vec![0; (inp_vec.last().unwrap() +1) as usize];
+    let mut conn_count: Vec<u64> = vec![0; (inp_vec.last().unwrap() + 1) as usize];
 
     conn_count[0] = 1; // The first adapter is the starting point
 
     for (index, val) in inp_vec.iter().skip(1).enumerate() {
         // Skip the first element as it is the first starting point
-        if inp_vec.contains(&(*val - 1)) {
-            conn_count[*val as usize] += conn_count[(*val - 1) as usize];
+        conn_count[*val as usize] += conn_count[(*val - 1) as usize];
+        if (*val as i32 - 2) >= 0 {
+            conn_count[*val as usize] += conn_count[(*val - 2) as usize];
         }
-        if (*val as i32 - 2) > 0 {
-            if inp_vec.contains(&(*val - 2)) {
-                conn_count[*val as usize] += conn_count[(*val - 2) as usize];
-            }
-        }
-        if (*val as i32 - 3) > 0 {
-            if inp_vec.contains(&(*val - 3)) {
-                conn_count[*val as usize] += conn_count[(*val - 3) as usize];
-            }
+        if (*val as i32 - 3) >= 0 {
+            conn_count[*val as usize] += conn_count[(*val - 3) as usize];
         }
     }
     *conn_count.last().unwrap()
