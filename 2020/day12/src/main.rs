@@ -77,66 +77,37 @@ fn puzzle2(inp: &Vec<(Dir, isize)>) -> isize {
     let mut EW = 10;
     let mut way_ns: isize = 0;
     let mut way_ew: isize = 0;
-    let mut cur_dir = (Dir::North, Dir::East); // Always start with east
-    let mut sign_dir: HashMap<Dir, i32> = HashMap::new();
-    sign_dir.insert(Dir::North, 1);
-    sign_dir.insert(Dir::South, -1);
-    sign_dir.insert(Dir::East, 1);
-    sign_dir.insert(Dir::West, -1);
-
-    let find_next_dir = |cur1: Dir, cur2: Dir, mov_ind: isize| -> (Dir, Dir) {
-        let circ_dir: Vec<Dir> = vec![Dir::North, Dir::East, Dir::South, Dir::West];
-        let vec_len = circ_dir.len();
-        let cur1_index = circ_dir.iter().position(|&x| x == cur1).unwrap();
-        let cur2_index = circ_dir.iter().position(|&x| x == cur2).unwrap();
-        if mov_ind.is_positive() {
-            let next_index: usize = (cur1_index + mov_ind as usize) % vec_len;
-            let next_2index: usize = (cur2_index + mov_ind as usize) % vec_len;
-            return (circ_dir[next_index], circ_dir[next_2index]);
-        } else {
-            // If the value is negative (reverse move), add the neg value with length and use it to
-            // move forward
-            let offset: isize = vec_len as isize + mov_ind;
-            let next_index: usize = (cur1_index + offset as usize) % vec_len;
-            let next_2index: usize = (cur2_index + offset as usize) % vec_len;
-            return (circ_dir[next_index], circ_dir[next_2index]);
-        }
-    };
 
     for val in inp {
         match val.0 {
             Dir::North => NS += val.1,
-            Dir::South => NS += (-val.1),
+            Dir::South => NS += val.1,
             Dir::East => EW += val.1,
-            Dir::West => EW += (-val.1),
-            Dir::Right => {
-                cur_dir = find_next_dir(cur_dir.0, cur_dir.1, val.1);
-                if cur_dir.0 == Dir::East || cur_dir.0 == Dir::West {
-                    let tmp_EW = EW.clone();
-                    EW = (*sign_dir.get(&cur_dir.0).unwrap()as isize) * NS.abs() ;
-                    NS = (*sign_dir.get(&cur_dir.1).unwrap()as isize) * tmp_EW.abs() ;
-                }else {
-                    let tmp_EW = EW.clone();
-                    EW = (*sign_dir.get(&cur_dir.1).unwrap()as isize) * NS.abs() ;
-                    NS = (*sign_dir.get(&cur_dir.0).unwrap()as isize) * tmp_EW.abs() ;
+            Dir::West => EW += val.1,
+            Dir::Right | Dir::Left => {
+                //R90 or L270 are the same
+                if val.1 == 1 || val.1 == -3 {
+                    let tmp_ew = EW.clone();
+                    EW = NS;
+                    NS = -1 * tmp_ew;
                 }
-            }
-            Dir::Left => {
-                cur_dir = find_next_dir(cur_dir.0, cur_dir.1, val.1);
-                if cur_dir.0 == Dir::East || cur_dir.0 == Dir::West {
-                    let tmp_EW = EW.clone();
-                    EW = (*sign_dir.get(&cur_dir.0).unwrap()as isize) * NS.abs() ;
-                    NS = (*sign_dir.get(&cur_dir.1).unwrap()as isize) * tmp_EW.abs() ;
-                }else {
-                    let tmp_EW = EW.clone();
-                    EW = (*sign_dir.get(&cur_dir.1).unwrap()as isize) * NS.abs() ;
-                    NS = (*sign_dir.get(&cur_dir.0).unwrap()as isize) * tmp_EW.abs() ;
+                //R180 or L180 are the same
+                if val.1 == 2 || val.1 == -2 {
+                    // let tmp_ew = EW.clone();
+                    EW = -1 * EW;
+                    NS = -1 * NS;
+                }
+                //R270 or L90 are the same
+                if val.1 == 3 || val.1 == -1 {
+                    let tmp_ew = EW.clone();
+                    EW = -1 * NS;
+                    NS = tmp_ew;
                 }
             }
             Dir::Forward => {
-                    way_ew += val.1 * EW;
-                    way_ns += val.1 * NS;
-            } 
+                way_ew += val.1 * EW;
+                way_ns += val.1 * NS;
+            }
         }
     }
 
@@ -192,8 +163,8 @@ fn puzzle1(inp: &Vec<(Dir, isize)>) -> isize {
 fn main() {
     let contents =
         fs::read_to_string("src/input.txt").expect("Something went wrong reading the file");
-    // let input = contents.as_str();
-    let input = _RAW_INP1;
+    let input = contents.as_str();
+    // let input = _RAW_INP1;
 
     let dir_pair = parse_input(input);
 
