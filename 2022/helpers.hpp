@@ -10,7 +10,7 @@
 namespace helpers {
 using Tokens_t = std::vector<std::string>;
 
-Tokens_t splitstr(std::string& str, std::string deli = " ") {
+static Tokens_t splitstr(std::string& str, std::string deli = " ") {
 	int start = 0;
 	int end = str.find(deli);
 	Tokens_t token;
@@ -24,8 +24,16 @@ Tokens_t splitstr(std::string& str, std::string deli = " ") {
 	return token;
 }
 
-static inline bool found_str(std::string_view str, std::string_view substr) {
+static inline bool found_str(std::string& str, std::string& substr) {
 	return str.find(substr) != std::string::npos;
+}
+
+static inline std::string input_file() {
+#ifdef DEMO
+	return "input";
+#else
+	return "input_full";
+#endif
 }
 
 }  // namespace helpers
