@@ -2,6 +2,7 @@
 #define HELPERS_H_
 
 #include <algorithm>
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -34,6 +35,25 @@ static inline std::string input_file() {
 #else
 	return "input_full";
 #endif
+}
+
+template <typename T>
+static std::vector<std::vector<T>> file_to_matrix(std::ifstream& file) {
+	std::vector<std::vector<T>> in;
+
+	int i = 0;
+	std::string line;
+	while (std::getline(file, line)) {
+		in.push_back({});
+		for (auto v : line) {
+			if constexpr (std::is_integral<T>())
+				in[i].push_back(std::stoi(std::string{v}));
+			else
+				in[i].push_back(v);
+		}
+		++i;
+	}
+	return in;
 }
 
 }  // namespace helpers
