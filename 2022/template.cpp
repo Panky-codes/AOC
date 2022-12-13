@@ -19,7 +19,6 @@ int part2() {
 	return 0;
 }
 
-// Move the helpers to a library
 int main(int argc, char** argv) {
 	std::string line;
 	std::ifstream file{helpers::input_file()};
