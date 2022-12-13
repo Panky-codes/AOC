@@ -56,6 +56,13 @@ static std::vector<std::vector<T>> file_to_matrix(std::ifstream& file) {
 	return in;
 }
 
+struct PairHash {
+  template <typename T1, typename T2>
+  auto operator()(const std::pair<T1, T2> &p) const -> size_t {
+    return std::hash<T1>{}(p.first) ^ std::hash<T2>{}(p.second);
+  }
+};
+
 }  // namespace helpers
 
 #endif
