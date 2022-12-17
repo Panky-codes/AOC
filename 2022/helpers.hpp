@@ -25,7 +25,7 @@ static Tokens_t splitstr(std::string& str, std::string deli = " ") {
 	return token;
 }
 
-static inline bool found_str(std::string& str, std::string& substr) {
+static inline bool found_str(std::string& str, const char* substr) {
 	return str.find(substr) != std::string::npos;
 }
 
