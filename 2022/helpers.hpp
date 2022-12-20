@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <fstream>
+#include <functional>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -37,8 +38,10 @@ static inline std::string input_file() {
 #endif
 }
 
-template <typename T>
-static std::vector<std::vector<T>> file_to_matrix(std::ifstream& file) {
+template <typename T, typename V>
+static std::vector<std::vector<T>> file_to_matrix(
+    std::ifstream& file,
+    std::function<T(V)> lambda = [](V in) { return (T)in; }) {
 	std::vector<std::vector<T>> in;
 
 	int i = 0;
@@ -46,21 +49,17 @@ static std::vector<std::vector<T>> file_to_matrix(std::ifstream& file) {
 	while (std::getline(file, line)) {
 		in.push_back({});
 		for (auto v : line) {
-			if constexpr (std::is_integral<T>())
-				in[i].push_back(std::stoi(std::string{v}));
-			else
-				in[i].push_back(v);
+			in[i].push_back(lambda(v));
 		}
 		++i;
 	}
 	return in;
 }
-
 struct PairHash {
-  template <typename T1, typename T2>
-  auto operator()(const std::pair<T1, T2> &p) const -> size_t {
-    return std::hash<T1>{}(p.first) ^ std::hash<T2>{}(p.second);
-  }
+	template <typename T1, typename T2>
+	auto operator()(const std::pair<T1, T2>& p) const -> size_t {
+		return std::hash<T1>{}(p.first) ^ std::hash<T2>{}(p.second);
+	}
 };
 
 }  // namespace helpers
