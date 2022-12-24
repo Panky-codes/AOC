@@ -41,7 +41,7 @@ static inline std::string input_file() {
 template <typename T, typename V>
 static std::vector<std::vector<T>> file_to_matrix(
     std::ifstream& file,
-    std::function<T(V)> lambda = [](V in) { return (T)in; }) {
+    std::function<T(V)> lambda = [](V in) -> T { return (T)in; }) {
 	std::vector<std::vector<T>> in;
 
 	int i = 0;

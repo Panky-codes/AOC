@@ -129,7 +129,8 @@ int main(int argc, char** argv) {
 	int ans1 = 0;
 	int ans2 = 0;
 
-	auto in = helpers::file_to_matrix<int>(file);
+	auto in = helpers::file_to_matrix<int, char>(
+	    file, [](char v) -> int { return int(v) - 48; });
 	// Part 1 could be easily solved with the approach used in part2
 	// But keeping it as is.
 	std::cout << "First: " << part1(in) << '\n';
