@@ -1,1 +1,7 @@
 */*/*out
+*/*/*out_full
+*/*/.cache/
+*/*/compile_commands.json
+*/*/subprojects/*
+
+
